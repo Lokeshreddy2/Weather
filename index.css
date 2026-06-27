@@ -119,3 +119,85 @@ body
     justify-content: center;
     gap: 10px;
 }
+
+/* Mobile Devices */
+@media (max-width: 768px) {
+
+    .searchBar {
+        height: auto;
+        padding: 15px 10px;
+    }
+
+    .searchBarParentDiv {
+        width: 95%;
+    }
+
+    .mainContentParentDiv {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+        gap: 15px;
+    }
+
+    .leftDiv,
+    .rightDiv {
+        width: 100%;
+        height: auto;
+    }
+
+    .leftChild {
+        width: 100%;
+        height: auto;
+        min-height: 250px;
+        margin: 0;
+        padding: 15px;
+    }
+
+    .rightRow {
+        width: 100%;
+        height: auto;
+    }
+
+    /* Metrics Row */
+    .extraMetric {
+        width: 48%;
+        min-width: unset;
+        padding: 15px;
+    }
+
+    /* AQI & Forecast Cards */
+    .rowTwoDiv {
+        width: 100%;
+        height: auto;
+        padding: 15px;
+    }
+
+    /* Hourly Forecast Cards */
+    .todayTemp {
+        min-width: 90px;
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    /* City Info */
+    #cityName {
+        font-size: 1.8rem;
+    }
+
+    #cityTemp {
+        font-size: 1.5rem;
+    }
+
+    #comingFiveDaysTitle {
+        font-size: 1.2rem;
+    }
+
+    .currentTempDiv h6 {
+        font-size: 1rem;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+}

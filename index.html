@@ -220,6 +220,7 @@
             const date=new Date(timestamp*1000);
             return date.toLocaleString();
         }
+
         async function fetchAQIData(lat,lon){
             let fetchAQIData = await fetch(
                 `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=9502d3bac5622b8ce97e1d4f095429de`
@@ -233,6 +234,7 @@
             $('#no2')[0].innerText = list.no2;
             $('#so2')[0].innerText = list.so2;
         }
+
         async function fetchFivedayForecast(lat, lon){
             let response = await fetch(
                 `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=9502d3bac5622b8ce97e1d4f095429de&units=metric`
@@ -277,46 +279,85 @@
                     date.toLocaleDateString();
             });
         }
+
+        // Helper function to handle rendering the UI once weather data is received
+        function renderWeatherData(formattedData) {
+            let responseCityName=formattedData.name;
+            let responseTemp=formattedData.main.temp; 
+            let skyDescription=formattedData.weather[0].description; 
+
+            $('#cityName')[0].innerText=responseCityName;
+            $('#cityTemp')[0].innerText=responseTemp;
+            $('#skyDesc')[0].innerText=skyDescription;
+
+            let properDate=dateFormat(formattedData.dt);
+            let date=properDate.split(',')[0];
+            let time=properDate.split(',')[1];   
+            $('#date')[0].innerText=date;
+            $('#time')[0].innerText=time;
+
+            let sunriseTimestamp=formattedData.sys.sunrise;
+            let sunsetTimestamp=formattedData.sys.sunset;
+            let properSunriseTime=dateFormat(sunriseTimestamp);
+            let properSunsetTime=dateFormat(sunsetTimestamp); 
+            let sunriseTime=properSunriseTime.split(',')[1];
+            let sunsetTime=properSunsetTime.split(',')[1];   
+            $('#sunRiseTime')[0].innerText=sunriseTime;
+            $('#sunSetTime')[0].innerText=sunsetTime;
+
+            let lat=formattedData.coord.lat;
+            let lon=formattedData.coord.lon;
+
+            $('#metric1Value')[0].innerText = formattedData.main.pressure + " hPa";
+            $('#metric2Value')[0].innerText = formattedData.main.humidity + "%";
+            $('#metric3Value')[0].innerText = formattedData.wind.speed + " m/s";
+            $('#metric4Value')[0].innerText = (formattedData.visibility / 1000) + " km";
+
+            fetchAQIData(lat,lon);
+            fetchFivedayForecast(lat, lon);
+        }
+
+        // Fetch weather data when searching via City Name input
         async function fetchData()
         {
             let cityName=document.getElementsByClassName('inputfield')[0].value;
-            let requestData= await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=9502d3bac5622b8ce97e1d4f095429de&units=metric`)
-            let formattedData= await requestData.json()
-            let responseCityName=formattedData.name
-            let responseTemp=formattedData.main.temp 
-            let skyDescription=formattedData.weather[0].description 
-            $('#cityName')[0].innerText=responseCityName
-            $('#cityTemp')[0].innerText=responseTemp
-            $('#skyDesc')[0].innerText=skyDescription
-            let properDate=dateFormat(formattedData.dt)
-            let date=properDate.split(',')[0]
-            let time=properDate.split(',')[1]   
-            $('#date')[0].innerText=date
-            $('#time')[0].innerText=time
-            let sunriseTimestamp=formattedData.sys.sunrise;
-            let sunsetTimestamp=formattedData.sys.sunset;
-            let properSunriseTime=dateFormat(sunriseTimestamp)
-            let properSunsetTime=dateFormat(sunsetTimestamp) 
-            let sunriseTime=properSunriseTime.split(',')[1]
-            let sunsetTime=properSunsetTime.split(',')[1]   
-            $('#sunRiseTime')[0].innerText=sunriseTime
-            $('#sunSetTime')[0].innerText=sunsetTime
-            let lat=formattedData.coord.lat;
-            let lon=formattedData.coord.lon;
-            $('#metric1Value')[0].innerText =
-                formattedData.main.pressure + " hPa";
-
-            $('#metric2Value')[0].innerText =
-                formattedData.main.humidity + "%";
-
-            $('#metric3Value')[0].innerText =
-                formattedData.wind.speed + " m/s";
-
-            $('#metric4Value')[0].innerText =
-                (formattedData.visibility / 1000) + " km";
-            fetchAQIData(lat,lon)
-            fetchFivedayForecast(lat, lon);
+            if(!cityName) return;
+            
+            let requestData= await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=9502d3bac5622b8ce97e1d4f095429de&units=metric`);
+            let formattedData= await requestData.json();
+            renderWeatherData(formattedData);
         }
+
+        // Fetch weather data when coordinates are available on load
+        async function fetchDataByCoords(lat, lon) {
+            let requestData = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=9502d3bac5622b8ce97e1d4f095429de&units=metric`);
+            let formattedData = await requestData.json();
+            renderWeatherData(formattedData);
+        }
+
+        // Automatically trigger geolocation request when page finishes loading
+        window.addEventListener('load', () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        let lat = position.coords.latitude;
+                        let lon = position.coords.longitude;
+                        fetchDataByCoords(lat, lon);
+                    },
+                    (error) => {
+                        console.log("Location access denied or unavailable. Loading default city.");
+                        // Fallback: load a default city if permission is denied
+                        document.getElementsByClassName('inputfield')[0].value = "New Delhi";
+                        fetchData();
+                    }
+                );
+            } else {
+                console.log("Geolocation is not supported by this browser.");
+                // Fallback for older browsers
+                document.getElementsByClassName('inputfield')[0].value = "New Delhi";
+                fetchData();
+            }
+        });
     </script>
 
     </body>
