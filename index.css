@@ -43,7 +43,7 @@ body
 .mainContentParentDiv
 {
     height: 90vh;
-
+    flex-direction: row;
 }
 .leftDiv
 {
